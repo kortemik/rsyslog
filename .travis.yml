@@ -20,3 +20,4 @@ install:
  - sudo apt-get update -qq
 
 script: ./configure ; make
+
