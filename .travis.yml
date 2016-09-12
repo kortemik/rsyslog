@@ -25,5 +25,4 @@ install:
  - if [ "$CXX" = "gcc" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
  - sudo apt-get update -qq
 
-script: ./configure ; make
-
+script: cd rsyslog ; ./configure ; make
