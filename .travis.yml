@@ -18,7 +18,7 @@ addons:
       description: "Build submitted via Travis CI"
     notification_email: kordex@gmail.com
     build_command_prepend: '/bin/true'
-    build_command:   "cd ${HOME}/build/kortemik/rsyslog ; bash .travis.sh"
+    build_command:   "/bin/bash .travis.sh"
     branch_pattern: coverity
 
 install:
@@ -30,4 +30,4 @@ install:
 
 script:
  - cd ${HOME}/build/kortemik/rsyslog
- - bash .travis.sh
+ - /bin/bash .travis.sh
