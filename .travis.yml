@@ -31,22 +31,25 @@ install:
 script:
  - git clone https://github.com/rsyslog/librelp.git ${HOME}/build/kortemik/librelp
  - cd ${HOME}/build/kortemik/librelp
+ - autoreconf -fvi
  - ./configure --prefix=${HOME}/build/kortemik/target/librelp
  - make
  - make install
  - git clone https://github.com/rsyslog/liblogging.git ${HOME}/build/kortemik/liblogging
  - cd ${HOME}/build/kortemik/liblogging
+ - autoreconf -fvi
  - ./configure --prefix=${HOME}/build/kortemik/target/liblogging --disable-journal --enable-rfc3195 --disable-man-pages 
  - make
  - make install
  - git clone https://github.com/rsyslog/libestr.git ${HOME}/build/kortemik/libestr
  - cd ${HOME}/build/kortemik/libestr
+ - autoreconf -fvi
  - ./configure --prefix=${HOME}/build/kortemik/target/libestr
  - make
  - make install
  - git clone https://github.com/rsyslog/libfastjson.git ${HOME}/build/kortemik/libfastjson
  - cd ${HOME}/build/kortemik/libfastjson
- - ./configure --prefix=${HOME}/build/kortemik/target/libfastjson
+ - ./autogen.sh --prefix=${HOME}/build/kortemik/target/libfastjson
  - make
  - make install
  - cd ${HOME}/build/kortemik/rsyslog
