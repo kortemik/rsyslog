@@ -17,12 +17,15 @@ addons:
       name: "kortemik/rsyslog"
       description: "Build submitted via Travis CI"
     notification_email: kordex@gmail.com
-    build_command_prepend: './configure'
+    build_command_prepend: 'cd rsyslog; ./autogen.sh; ./configure'
     build_command:   "make"
     branch_pattern: coverity
 
 install:
  - if [ "$CXX" = "gcc" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
  - sudo apt-get update -qq
+ - sudo apt-get install autoconf automake libtool flex byacc
+ - sudo apt-get install libdbi-dev libmysqlclient-dev postgresql-client libpq-dev libnet-dev librdkafka-dev libgrok-dev libgrok1 libgrok-dev libpcre3-dev libtokyocabinet-dev libglib2.0-dev libmongo-client-dev libhiredis-dev
+ - sudo apt-get install 
 
-script: cd rsyslog ; ./configure ; make
+script: cd rsyslog; ./autogen.sh; ./configure; make
