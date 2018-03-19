@@ -1,117 +1,33 @@
-sudo: required
-
-os:
- - osx
- - linux
-
 language: c
- 
+os:
+  - linux
+
 compiler:
   - gcc
 
-
 env:
   global:
-    secure: DsTuVAZg5omWT652Xnz/ZG20nJ5ShdTDXPQA01HscUhjAzcuMYsCPp889QoLip+3O5yYH6/oH2WprQA6ZQQMt+7idNRo6ennu7tPQiHEBm/lK2Yq1W6r6tOb1zmSalbIVWV2cGTdKOOuHAatgmp/L70WjOlCrtLvPT+JQ9AkzLU=
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "aT9XGsSC6QSDUMklCkicyYzMyMhbLzWcLvjlQHg1ZGj2Za83Fpx7jK5RzS+hIp+qQ8n354vbS8THKCeTYq4qTOkBPV9XSlveYRsFi6oFJTcteZiWtHecEi/+fV/LLWruggCEMyCdRkGZ87wtxMtW+iRbXaGiRjD8O2TDmJOTQHbfg2UIdzw2kpHEbOV+qEZTIsyFSYlsG/Byxp8myjv6mmGKpNjgBLSfJHczGL2yw56aMX2/PII61LRcfNlIXJ/N5TNLjSjyQUWtGYHzhJGzE3txYEuC4JD0pxq/dVU2X4vtLcS0Z0MfhygeSzL+t4JpTILuc8sQiNcz1f1MABHh8/wIEata47NUjzoUfws5GVLDqwyf5Epnv+IrObqPCv1TZVV2ckQFgXw0e5bH3zR+syVpwF7eXtxsCNxGoTj+VTIGe6zZNQNunrfN15TajhIaKHN8avXSkC0albMd32D6qqtHXx6TDcsA3Odg8aSkWZWIzScjQ3Qwu43tpoNpxkDqF+BVu0UiAclh8G4185XlQ2VC4/ZzLhHCcwQqQdyg2LOd3x3BpRE4GJW3kX/MgnMc0Xh6NWgTXi8XY1JzBDK9V3wzJ2hxeODgcwEqXlIU+4fgw3bi2AP2R2kwasDiWroRpFuXHNPsBaWYrLJywusHhL/8fgwEevi0CI13Xce5Dzk="
 
 addons:
-  apt:
-    sources:
-    - sourceline: 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/git-draft/xUbuntu_14.04/ ./'
-      key_url: 'http://download.opensuse.org/repositories/network:/messaging:/zeromq:/git-draft/xUbuntu_12.04/Release.key'
+  coverity_scan:
+    project:
+      name: "kortemik/rsyslog"
+      description: "Build submitted via Travis CI"
+    notification_email: kordex@gmail.com
+    build_command_prepend: '/bin/true'
+    build_command:   "/bin/bash .travis.sh"
+    branch_pattern: coverity
 
-matrix:
-  allow_failures:
-    # the following is left in commented out to provide a sample of how
-    # this feature is used for multiple build matrix entries
-    #- env: RUN="docker-alpine.sh"
-    #- env: RUN="docker-ubuntu-devel.sh"
-    #- env: RUN="run-osx.sh", CFLAGS="-g"
+install:
+ - if [ "$CXX" = "gcc" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
+ - sudo apt-get update -qq
+ - sudo apt-get install autoconf automake libtool flex byacc
+ - sudo apt-get install libdbi-dev libmysqlclient-dev postgresql-client libpq-dev libnet-dev libpcre3-dev libtokyocabinet-dev libglib2.0-dev libmongo-client-dev libhiredis-dev uuid-dev python-docutils
 
-  exclude:
-     - compiler: "gcc"
-  include:
-     - os: osx
-       compiler: "clang"
-       env: RUN="run-osx.sh", CFLAGS="-g"
-
-     - os: linux
-       language: minimal
-       services: docker
-       env: RUN="travis-run-compile-tests.sh"
-
-# right now does not work, so keep commented out
-#     - os: linux
-#       services: docker
-#       env: RUN="docker-ubuntu-devel.sh"
-
-     - os: linux
-       compiler: "clang"
-       services:
-         - elasticsearch
-         - mysql
-         - postgresql
-       env: RUN="run.sh",CHECK="YES", ESTEST="YES", CFLAGS="-g -O1 -fsanitize=address -fno-color-diagnostics"
-
-     - os: linux
-       compiler: "clang"
-       dist: trusty
-       services:
-         - elasticsearch
-         - mysql
-         - postgresql
-       env: RUN="run.sh",CFLAGS="-fsanitize=undefined,nullability,unsigned-integer-overflow -fno-sanitize-recover=undefined,nullability,unsigned-integer-overflow -g -O3 -fno-omit-frame-pointer -fno-color-diagnostics", UBSAN_OPTIONS="print_stacktrace=1", CHECK="YES", ESTEST="YES", KAFKA="YES"
-
-     - os: linux
-       compiler: "clang"
-       # we run this test without assert() enabled, so that we get "production timing"
-       dist: trusty
-       services:
-         - mysql
-         - postgresql
-       env: RUN="run.sh",AD_PPA="v8-devel", CHECK="YES", CFLAGS="-g -O1 -fsanitize=address -fno-color-diagnostics", CONFIGURE_FLAGS="--disable-debug"
-
-     - os: linux
-       compiler: "clang"
-       services:
-         - mysql
-         - postgresql
-       env: RUN="run.sh",MERGE="YES", CHECK="YES", GROK="YES", KAFKA="YES", CFLAGS="-g -O2"
-       dist: trusty
-
-     - os: linux
-       compiler: "gcc"
-       services:
-         - mysql
-         - postgresql
-       env: RUN="run.sh",BUILD_FROM_TARBALL="YES", GROK="YES", KAFKA="YES", CHECK="YES", CFLAGS="-g -O2", RS_TESTBENCH_VALGRIND_EXTRA_OPTS="--suppressions=travis/trusty.supp --gen-suppressions=all", EXTRA_CONFIGURE="--disable-testbench1"
-       dist: trusty
-
-     - os: linux
-       compiler: "gcc"
-       services:
-         - mysql
-         - postgresql
-       env: RUN="run.sh",BUILD_FROM_TARBALL="YES", CHECK="YES", CFLAGS="-g -O2", RS_TESTBENCH_VALGRIND_EXTRA_OPTS="--suppressions=travis/trusty.supp --gen-suppressions=all", EXTRA_CONFIGURE="--disable-testbench2"
-       dist: trusty
-
-     - os: linux
-       # CRON/Coverity entry!
-       compiler: "gcc"
-       dist: trusty
-       env: RUN="run-cron.sh",DO_COVERITY="YES",DO_CRON="YES", KAFKA="YES", GROK="YES"
-
-before_install:
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "${AD_PPA}x" == "x" ] ; then AD_PPA="v8-stable"; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then sudo add-apt-repository ppa:adiscon/$AD_PPA -y ; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then sudo add-apt-repository ppa:qpid/released -y ; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then sudo apt-get update -qq ; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then mysql -u root -e "CREATE USER 'rsyslog'@'localhost' IDENTIFIED BY 'testbench';" ; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then mysql -u root -e "GRANT ALL PRIVILEGES ON * . * TO 'rsyslog'@'localhost'; FLUSH PRIVILEGES;" ; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then mysql -u root -e "CREATE DATABASE Syslog; GRANT ALL ON Syslog.* to 'rsyslog'@'localhost' identified by 'testbench';" ; fi
-  #- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then mysql -u root -e "USE Syslog; CREATE TABLE SystemEvents (ID int unsigned not null auto_increment primary key, CustomerID bigint,ReceivedAt datetime NULL,DeviceReportedTime datetime NULL,Facility smallint NULL,Priority smallint NULL,FromHost varchar(60) NULL,Message text,NTSeverity int NULL,Importance int NULL,EventSource varchar(60),EventUser varchar(60) NULL,EventCategory int NULL,EventID int NULL,EventBinaryData text NULL,MaxAvailable int NULL,CurrUsage int NULL,MinUsage int NULL,MaxUsage int NULL,InfoUnitID int NULL,SysLogTag varchar(60),EventLogType varchar(60),GenericFileName VarChar(60),SystemID int NULL); CREATE TABLE SystemEventsProperties (ID int unsigned not null auto_increment primary key,SystemEventID int NULL,ParamName varchar(255) NULL,ParamValue text NULL);" ; fi
-#
-#install:
 
 script:
-   - devtools/ci/travis/do-run.sh
+ - cd ${HOME}/build/kortemik/rsyslog
+ - /bin/bash .travis.sh
